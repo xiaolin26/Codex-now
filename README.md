@@ -93,6 +93,11 @@ If the file is missing, `Codex Now` auto-detects available terminals.
 - The last opened directory is stored locally in `~/.codex-now-last-dir`
 - No personal machine state is committed into the repository
 
+## Acknowledgements
+
+- Inspired by `claude-code-now`: `https://github.com/orange2ai/claude-code-now`
+- Thanks to 橘子老师 for the original idea and reference implementation
+
 ## Screenshots
 
 Repository screenshot placeholders live in `assets/screenshots/`.
@@ -121,3 +126,8 @@ See `assets/screenshots/README.md` for a concrete capture checklist.
 - Releases: `https://github.com/xiaolin26/Codex-now/releases`
 - 当前版本：`v1.0.0`
 - 直达页面：`https://github.com/xiaolin26/Codex-now/releases/tag/v1.0.0`
+
+鸣谢：
+
+- 参考项目：`https://github.com/orange2ai/claude-code-now`
+- 感谢橘子老师提供原始思路和参考实现

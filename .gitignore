@@ -1,0 +1,15 @@
+.DS_Store
+*.log
+
+dist/
+build/
+
+*.swp
+*.swo
+
+.env
+.env.*
+
+node_modules/
+
+assets/AppIcon.icns

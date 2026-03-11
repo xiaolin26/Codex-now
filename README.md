@@ -32,6 +32,12 @@ Launch `codex` in the current Finder folder with one click on macOS.
 curl -fsSL https://raw.githubusercontent.com/xiaolin26/Codex-now/main/install.sh | bash
 ```
 
+## Download
+
+- Release page: `https://github.com/xiaolin26/Codex-now/releases`
+- Latest macOS package: `Codex-Now-v1.0.0-macos.zip`
+- SHA-256 checksum is published alongside the zip asset in the same release
+
 ## Local Install
 
 ```bash
@@ -102,3 +108,8 @@ Suggested screenshots for the GitHub page:
 
 - `~/Applications/Codex Now.app`
 - `~/.local/bin/codex-now`
+
+下载地址：
+
+- Releases: `https://github.com/xiaolin26/Codex-now/releases`
+- 当前版本：`v1.0.0`

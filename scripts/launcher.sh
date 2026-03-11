@@ -131,7 +131,7 @@ if [ -z "$CODEX_PATH" ]; then
 
   echo "$TARGET_DIR" > "$LAST_DIR_FILE"
 
-  TMP=$(mktemp /tmp/codex-install-XXXXXX.sh)
+  TMP=$(mktemp -t codex-install).sh
   {
     echo "#!/bin/bash"
     echo "export PATH=\"$HOME/.local/bin:$HOME/.npm-global/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin\""
@@ -163,7 +163,7 @@ fi
 # ── Codex found: check login then launch ──────────────────────────────────────
 echo "$TARGET_DIR" > "$LAST_DIR_FILE"
 
-TMP=$(mktemp /tmp/codex-launch-XXXXXX.sh)
+TMP=$(mktemp -t codex-launch).sh
 {
   echo "#!/bin/bash"
   echo "export PATH=\"$HOME/.local/bin:$HOME/.npm-global/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin\""

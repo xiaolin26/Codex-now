@@ -11,5 +11,3 @@ build/
 .env.*
 
 node_modules/
-
-assets/AppIcon.icns

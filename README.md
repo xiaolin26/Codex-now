@@ -1,5 +1,9 @@
 # Codex Now
 
+[![Release](https://img.shields.io/github/v/release/xiaolin26/Codex-now)](https://github.com/xiaolin26/Codex-now/releases)
+[![Platform](https://img.shields.io/badge/platform-macOS-black)](https://github.com/xiaolin26/Codex-now)
+[![License](https://img.shields.io/github/license/xiaolin26/Codex-now)](https://github.com/xiaolin26/Codex-now/blob/main/LICENSE)
+
 Launch `codex` in the current Finder folder with one click on macOS.
 
 `Codex Now` is a lightweight macOS launcher for people who want to open the Codex CLI from Finder without manually `cd`-ing in Terminal first.
@@ -37,6 +41,7 @@ curl -fsSL https://raw.githubusercontent.com/xiaolin26/Codex-now/main/install.sh
 - Release page: `https://github.com/xiaolin26/Codex-now/releases`
 - Latest macOS package: `Codex-Now-v1.0.0-macos.zip`
 - SHA-256 checksum is published alongside the zip asset in the same release
+- Direct release link: `https://github.com/xiaolin26/Codex-now/releases/tag/v1.0.0`
 
 ## Local Install
 
@@ -98,6 +103,8 @@ Suggested screenshots for the GitHub page:
 - `Codex Now.app` in `~/Applications`
 - Terminal opening directly into the selected folder
 
+See `assets/screenshots/README.md` for a concrete capture checklist.
+
 ## 中文说明
 
 `Codex Now` 是一个 macOS 小工具，用来从 Finder 当前目录一键打开 `codex`。
@@ -113,3 +120,4 @@ Suggested screenshots for the GitHub page:
 
 - Releases: `https://github.com/xiaolin26/Codex-now/releases`
 - 当前版本：`v1.0.0`
+- 直达页面：`https://github.com/xiaolin26/Codex-now/releases/tag/v1.0.0`

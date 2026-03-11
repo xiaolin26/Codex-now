@@ -1,5 +1,4 @@
 #!/bin/bash
-set -euo pipefail
 
 TARGET_DIR="${1:-}"
 LAST_DIR_FILE="$HOME/.codex-now-last-dir"
@@ -41,11 +40,17 @@ fi
 # Find codex binary
 find_codex() {
   command -v codex 2>/dev/null && return
+  # Check all nvm node versions
   for p in "$HOME/.nvm/versions/node"/*/bin/codex; do
     [ -x "$p" ] && echo "$p" && return
   done
-  [ -x "$HOME/.local/bin/codex" ]     && echo "$HOME/.local/bin/codex"     && return
+  [ -x "$HOME/.local/bin/codex" ]      && echo "$HOME/.local/bin/codex"      && return
   [ -x "$HOME/.npm-global/bin/codex" ] && echo "$HOME/.npm-global/bin/codex" && return
+  # Check npm global prefix dynamically
+  if command -v npm >/dev/null 2>&1; then
+    NPM_BIN="$(npm config get prefix 2>/dev/null)/bin/codex"
+    [ -x "$NPM_BIN" ] && echo "$NPM_BIN" && return
+  fi
   echo ""
 }
 
@@ -56,26 +61,20 @@ detect_terminal() {
     local pref
     pref=$(tr -d '\r\n' < "$TERMINAL_CONFIG_FILE")
     case "$pref" in
-      iTerm|iTerm2)
-        [ -d "/Applications/iTerm.app" ]   && term="iTerm"   ;;
-      Warp)
-        [ -d "/Applications/Warp.app" ]    && term="Warp"    ;;
+      iTerm|iTerm2) [ -d "/Applications/iTerm.app" ]  && term="iTerm"   ;;
+      Warp)         [ -d "/Applications/Warp.app" ]   && term="Warp"    ;;
     esac
   else
-    if [ -d "/Applications/iTerm.app" ]; then
-      term="iTerm"
-    elif [ -d "/Applications/iTerm 2.app" ]; then
-      term="iTerm 2"
-    elif [ -d "/Applications/Warp.app" ]; then
-      term="Warp"
-    fi
+    [ -d "/Applications/iTerm.app" ]   && term="iTerm"
+    [ -d "/Applications/iTerm 2.app" ] && term="iTerm 2"
+    [ -d "/Applications/Warp.app" ]    && term="Warp"
   fi
   echo "$term"
 }
 
-# Open terminal and run a script file
-open_terminal() {
-  local script_path="$1"
+# Launch terminal with a command string directly (no temp files = no lock issues)
+launch_terminal() {
+  local cmd="$1"
   local term
   term=$(detect_terminal)
 
@@ -86,7 +85,7 @@ open_terminal() {
         -e "  activate" \
         -e "  create window with default profile" \
         -e "  tell current session of current window" \
-        -e "    write text \"bash $script_path\"" \
+        -e "    write text \"$cmd\"" \
         -e "  end tell" \
         -e "end tell"
       ;;
@@ -97,7 +96,7 @@ open_terminal() {
         -e '  tell application "System Events"' \
         -e '    keystroke "t" using {command down}' \
         -e '    delay 0.2' \
-        -e "    keystroke \"bash $script_path\"" \
+        -e "    keystroke \"$cmd\"" \
         -e '    keystroke return' \
         -e '  end tell' \
         -e 'end tell'
@@ -106,13 +105,14 @@ open_terminal() {
       osascript \
         -e 'tell application "Terminal"' \
         -e '  activate' \
-        -e "  do script \"bash $script_path\"" \
+        -e "  do script \"$cmd\"" \
         -e 'end tell'
       ;;
   esac
 }
 
 CODEX_PATH=$(find_codex)
+echo "$TARGET_DIR" > "$LAST_DIR_FILE"
 
 # ── No codex: offer to install ────────────────────────────────────────────────
 if [ -z "$CODEX_PATH" ]; then
@@ -129,61 +129,13 @@ if [ -z "$CODEX_PATH" ]; then
 
   [ "$ANSWER" != "Install" ] && exit 0
 
-  echo "$TARGET_DIR" > "$LAST_DIR_FILE"
-
-  TMP=$(mktemp -t codex-install).sh
-  {
-    echo "#!/bin/bash"
-    echo "export PATH=\"$HOME/.local/bin:$HOME/.npm-global/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin\""
-    printf 'cd %q\n' "$TARGET_DIR"
-    echo 'echo ""'
-    echo 'echo "========================================"'
-    echo 'echo "  Codex Now - Installing Codex CLI..."'
-    echo 'echo "  Please wait, this may take a minute."'
-    echo 'echo "========================================"'
-    echo 'echo ""'
-    # Install to ~/.npm-global to avoid permission issues with /usr/local
-    echo "mkdir -p \"$HOME/.npm-global\""
-    echo "npm config set prefix \"$HOME/.npm-global\""
-    echo "$NPM_PATH install -g @openai/codex"
-    echo 'echo ""'
-    echo 'echo "========================================"'
-    echo 'echo "  Install complete! Starting Codex..."'
-    echo 'echo "========================================"'
-    echo 'echo ""'
-    echo "export PATH=\"$HOME/.npm-global/bin:\$PATH\""
-    echo 'exec codex'
-  } > "$TMP"
-  chmod +x "$TMP"
-
-  open_terminal "$TMP"
+  # Install to ~/.npm-global to avoid /usr/local permission issues
+  CMD="mkdir -p \$HOME/.npm-global && npm config set prefix \$HOME/.npm-global && $NPM_PATH install -g @openai/codex && export PATH=\$HOME/.npm-global/bin:\$PATH && echo '' && echo '========================================' && echo '  Install complete! Starting Codex...' && echo '========================================' && echo '' && codex"
+  launch_terminal "$CMD"
   exit 0
 fi
 
 # ── Codex found: check login then launch ──────────────────────────────────────
-echo "$TARGET_DIR" > "$LAST_DIR_FILE"
+CMD="cd $(printf '%q' "$TARGET_DIR") && if $CODEX_PATH login status 2>&1 | grep -q 'Not logged in'; then echo '' && echo '========================================' && echo '  Codex Now - Login Required' && echo '  Browser will open for OpenAI login.' && echo '========================================' && echo '' && $CODEX_PATH login && echo '' && echo '========================================' && echo '  Login complete! Starting Codex...' && echo '========================================' && echo ''; fi && $CODEX_PATH"
 
-TMP=$(mktemp -t codex-launch).sh
-{
-  echo "#!/bin/bash"
-  echo "export PATH=\"$HOME/.local/bin:$HOME/.npm-global/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin\""
-  printf 'cd %q\n' "$TARGET_DIR"
-  echo "if $CODEX_PATH login status 2>&1 | grep -q 'Not logged in'; then"
-  echo '  echo ""'
-  echo '  echo "========================================"'
-  echo '  echo "  Codex Now - Login Required"'
-  echo '  echo "  Browser will open for OpenAI login."'
-  echo '  echo "========================================"'
-  echo '  echo ""'
-  echo "  $CODEX_PATH login"
-  echo '  echo ""'
-  echo '  echo "========================================"'
-  echo '  echo "  Login complete! Starting Codex..."'
-  echo '  echo "========================================"'
-  echo '  echo ""'
-  echo 'fi'
-  echo "exec $CODEX_PATH"
-} > "$TMP"
-chmod +x "$TMP"
-
-open_terminal "$TMP"
+launch_terminal "$CMD"
